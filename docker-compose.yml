@@ -1,7 +1,7 @@
 version: '2.1'
  
 services:
-  root_db:
+  postgresdb:
     image: postgres
     restart: unless-stopped
     volumes:
@@ -31,14 +31,12 @@ services:
     ports:
       - '8000:8000'
     environment:
-      - DB_HOST=mariadb
-      - DB_PORT=3306
+      POSTGRES_HOST: postgresdb
+      POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
-      POSTGRES_DB: root_db
-    volumes:
-      - './my-project:/app'
+      POSTGRES_DB: postgresdb
     depends_on:
-      - mariadb
+      - postgresdb
 volumes:
   db_data: {}
   nc_data: {}
