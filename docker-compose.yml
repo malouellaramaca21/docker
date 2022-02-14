@@ -1,0 +1,63 @@
+version: '3'
+
+networks:
+  laravel:
+  
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: webserver
+    ports:
+      - "8088:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - laravel
+  
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: root_db
+      MYSQL_USER: noco
+      MYSQL_PASSWORD: P@ssw0rd890
+      MYSQL_ROOT_PASSWORD: P@ssw0rd890
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - laravel  
+  
+  nocodb:
+    depends_on:
+      mysql:
+        condition: service_healthy
+    image: nocodb/nocodb
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      NC_DB: "mysql2://mysql:3306?u=noco&p=password&d=mysql"
+    networks:
+      - laravel
+      
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      "9000:9000"
+    networks:
+      - laravel
