@@ -1,0 +1,23 @@
+version: '1'
+
+services:
+  nocodb:
+    image: docker.io/nocodb/nocodb
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - NC_USER=nc_myapp
+      - NC_DB=nocodb_myapp
+  myapp:
+    image: docker.io/bitnami/laravel:8
+    ports:
+      - '8000:8000'
+    environment:
+      - DB_HOST=nocodb
+      - DB_PORT=3306
+      - DB_USERNAME=nc_myapp
+      - DB_DATABASE=nocodb_myapp
+    volumes:
+      - './my-project:/app'
+    depends_on:
+      - nocodb
